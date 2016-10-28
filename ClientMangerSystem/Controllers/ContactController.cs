@@ -1,6 +1,7 @@
 ﻿using ClientMangerSystem.Models;
 using System;
 using System.Collections.Generic;
+using System.Data.Entity.Validation;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
@@ -25,9 +26,9 @@ namespace ClientMangerSystem.Controllers
         }
 
         // GET: Contact/Create
-        public ActionResult Create()
+        public ActionResult Create(int clientID)
         {
-            var model = new 客戶聯絡人();
+            var model = new 客戶聯絡人() {客戶Id = clientID };
             return View(model);
         }
 
@@ -39,13 +40,13 @@ namespace ClientMangerSystem.Controllers
             {
                 db.客戶聯絡人.Add(contact);
                 db.SaveChanges();
-
-                return RedirectToAction("Index");
             }
-            catch
+            catch (Exception ee)
             {
+                ViewBag.Message = ee.Message;
                 return View(contact);
             }
+            return RedirectToAction("Index");
         }
 
         // GET: Contact/Edit/5
@@ -61,7 +62,6 @@ namespace ClientMangerSystem.Controllers
         {
             try
             {
-
                 var oldContact = db.客戶聯絡人.FirstOrDefault(p => p.Id == contact.Id);
                 if (oldContact != null)
                 {
@@ -71,8 +71,9 @@ namespace ClientMangerSystem.Controllers
                 }
                 return RedirectToAction("Index");
             }
-            catch
+            catch (Exception ee)
             {
+                ViewBag.Message = ee.Message;
                 return View(contact);
             }
         }
@@ -82,8 +83,28 @@ namespace ClientMangerSystem.Controllers
         {
             var data = db.客戶聯絡人.FirstOrDefault(p => p.Id == id);
             data.is刪除 = true;
-            
-            return View();
+
+            try
+            {
+                db.SaveChanges();
+            }
+            catch (DbEntityValidationException De)
+            {
+                foreach (var entityErrors in De.EntityValidationErrors)
+                {
+                    foreach (var vErrors in entityErrors.ValidationErrors)
+                    {
+                        throw new DbEntityValidationException(vErrors.PropertyName + " 發生錯誤：" + vErrors.ErrorMessage);
+                    }
+                }
+                throw;
+            }
+            catch (Exception ee)
+            {
+                throw new Exception(ee.Message);
+            }
+
+            return View("Index",new { ClinetId  = data.客戶Id});
         }
 
         

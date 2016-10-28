@@ -1,6 +1,7 @@
 ﻿using ClientMangerSystem.Models;
 using System;
 using System.Collections.Generic;
+using System.Data.Entity.Validation;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
@@ -26,9 +27,9 @@ namespace ClientMangerSystem.Controllers
         }
 
         // GET: BankInfo/Create
-        public ActionResult Create()
+        public ActionResult Create(int clientID)
         {
-            var model = new 客戶銀行資訊();
+            var model = new 客戶銀行資訊() { 客戶Id = clientID};
             return View(model);
         }
 
@@ -36,6 +37,7 @@ namespace ClientMangerSystem.Controllers
         [HttpPost]
         public ActionResult Create(客戶銀行資訊 bankInfo)
         {
+
             try
             {
                 db.客戶銀行資訊.Add(bankInfo);
@@ -43,8 +45,20 @@ namespace ClientMangerSystem.Controllers
 
                 return RedirectToAction("Index");
             }
-            catch
+            catch (DbEntityValidationException De)
             {
+                foreach (var entityErrors in De.EntityValidationErrors)
+                {
+                    foreach (var vErrors in entityErrors.ValidationErrors)
+                    {
+                        ViewBag.Message = vErrors.PropertyName + " 發生錯誤：" + vErrors.ErrorMessage;
+                    }
+                }
+                return View(bankInfo);
+            }
+            catch (Exception ee)
+            {
+                ViewBag.Message = ee.Message;
                 return View(bankInfo);
             }
         }
@@ -87,7 +101,7 @@ namespace ClientMangerSystem.Controllers
             var data = db.客戶銀行資訊.FirstOrDefault(p => p.Id == id);
             //data.is刪除 = true;
 
-            return View();
+            return View("Index", new { ClinetId = data.客戶Id });
         }
     }
 }

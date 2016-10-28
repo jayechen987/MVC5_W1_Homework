@@ -15,7 +15,7 @@ namespace ClientMangerSystem.Controllers
         public ActionResult Index(string search)
         {
 
-            var client = db.客戶資料.Where(p=>p.is刪除==0).OrderByDescending(p => p.Id).ToList();
+            var client = db.客戶資料.Where(p=>p.is刪除==false).OrderByDescending(p => p.Id).ToList();
 
             if (!string.IsNullOrEmpty(search))
             {
@@ -35,8 +35,29 @@ namespace ClientMangerSystem.Controllers
         public ActionResult Create(客戶資料 client)
         {
             db.客戶資料.Add(client);
-            db.SaveChanges();
-            return View();
+
+            try
+            {
+                db.SaveChanges();
+            }
+            catch (DbEntityValidationException De)
+            {
+                foreach (var entityErrors in De.EntityValidationErrors)
+                {
+                    foreach (var vErrors in entityErrors.ValidationErrors)
+                    {
+                        throw new DbEntityValidationException(vErrors.PropertyName + " 發生錯誤：" + vErrors.ErrorMessage);
+                    }
+                }
+                throw;
+            }
+            catch (Exception ee)
+            {
+
+                throw new Exception(ee.Message);
+                
+            }
+            return View("Index");
         }
 
         public ActionResult Detail(int id)
@@ -180,7 +201,7 @@ namespace ClientMangerSystem.Controllers
 
             if (data != null)
             {
-                data.is刪除 = 1;
+                data.is刪除 = true;
             }
 
             db.SaveChanges();

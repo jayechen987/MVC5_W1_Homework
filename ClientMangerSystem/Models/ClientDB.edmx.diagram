@@ -12,7 +12,7 @@
         <EntityTypeShape EntityType="客戶資料Model.客戶資料" Width="1.5" PointX="0.75" PointY="2.375" />
         <AssociationConnector Association="客戶資料Model.FK_客戶銀行資訊_客戶資料" />
         <AssociationConnector Association="客戶資料Model.FK_客戶聯絡人_客戶資料" />
-      </Diagram>
+        </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>
 </edmx:Edmx>
